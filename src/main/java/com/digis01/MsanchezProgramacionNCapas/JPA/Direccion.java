@@ -1,0 +1,143 @@
+
+package com.digis01.MsanchezProgramacionNCapas.JPA;
+
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
+@Entity
+public class Direccion {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "iddireccion")
+    private int IdDireccion;
+
+    @Column(name = "calle")
+    private String Calle;
+    
+    @Column(name = "numerointerior")
+    private String NumeroInterior;
+    
+    @Column(name = "numeroexterior")
+    private String NumeroExterior;
+    
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idusuario", nullable = false)
+    @JsonBackReference
+    public Usuario Usuario;
+    
+    @ManyToOne
+    @JoinColumn(name = "idcolonia")
+    public Colonia Colonia; //Propiedad de navegacion
+    
+    //Constructores
+    public Direccion() {}
+    
+    public Direccion(com.digis01.MsanchezProgramacionNCapas.JPA.Usuario usuarioML) {
+        
+        com.digis01.MsanchezProgramacionNCapas.JPA.Direccion direccionML = usuarioML.Direcciones.get(0);
+        
+        this.IdDireccion = direccionML.getIdDireccion();
+        this.Calle = direccionML.getCalle();
+        this.NumeroInterior = direccionML.getNumeroInterior();
+        this.NumeroExterior = direccionML.getNumeroExterior();
+        
+        this.Usuario = new Usuario();
+        this.Usuario.setIdUsuario(usuarioML.getIdUsuario());
+        
+        this.Colonia = new Colonia();
+        this.Colonia.setIdColonia(direccionML.Colonia.getIdColonia());
+        /*
+        this.Colonia.Municipio = new Municipio();
+        this.Colonia.Municipio.setIdMunicipio(direccionML.Colonia.Municipio.getIdMunicipio());
+        
+        this.Colonia.Municipio.Estado = new Estado();
+        this.Colonia.Municipio.Estado.setIdEstado(direccionML.Colonia.Municipio.Estado.getIdEstado());
+        
+        this.Colonia.Municipio.Estado.Pais = new Pais();
+        this.Colonia.Municipio.Estado.Pais.setIdPais(direccionML.Colonia.Municipio.Estado.Pais.getIdPais());
+        */
+        
+         
+        
+    }
+    
+    /*public Direccion(int idDireccion, String calle, String numeroInterior, String numeroExterior, int idUsuario) {
+        this.IdDireccion = idDireccion;
+        this.Calle = calle;
+        this.NumeroInterior = numeroInterior;
+        this.NumeroExterior = numeroExterior;
+        //this.IdColonia = idColonia;
+        this.IdUsuario = idUsuario;
+    }*/
+
+    public Direccion(int IdDireccion) {
+        this.IdDireccion = IdDireccion;
+    }
+    
+    //Getter y setter de idColonia
+    public void setIdDireccion(int idDireccion) {
+        this.IdDireccion = idDireccion;
+    }
+    
+    public int getIdDireccion() {
+        return this.IdDireccion;
+    }
+    
+    //Getter y setter de calle
+    public void setCalle(String calle) {
+        this.Calle = calle;
+    }
+    
+    public String getCalle() {
+        return this.Calle;
+    }
+    
+    //Getter y setter de numeroInterior
+    public void setNumeroInterior(String numeroInterior) {
+        this.NumeroInterior = numeroInterior;
+    }
+    
+    public String getNumeroInterior() {
+        return this.NumeroInterior;
+    }
+    
+    //Getter y setter de numeroExterior
+    public void setNumeroExterior(String numeroExterior) {
+        this.NumeroExterior = numeroExterior;
+    }
+    
+    public String getNumeroExterior() {
+        return this.NumeroExterior;
+    }
+
+   
+
+    public void setUsuario(Usuario Usuario) {
+        this.Usuario = Usuario;
+    }
+
+    public void setColonia(Colonia Colonia) {
+        this.Colonia = Colonia;
+    }
+    
+    
+    
+    
+    
+}

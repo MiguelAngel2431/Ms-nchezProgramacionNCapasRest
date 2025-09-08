@@ -1,0 +1,4 @@
+cmedel|Cesar Ivan|Medel|Rodriguez|cmedel@gmail.com|1234|31/03/2001||5512345678|5512345678|CRFGDG5435|1|Cda Allende|23|7|3
+mrodriguez|Melissa|Alvarado|Rodriguez|mrodriguez@gmail.com|1234|31/03/2001|F|5587654321|5587654321|MFER5345|3|Cda moras|2|12|1
+fgonzalez|Fabian|Gonzalez|Espinoza|fgonzalez@gmail.com|4321|24/11/2004|M|5512345678|5512345678|FFGFSG213|2|Av San Simon|9|4|11
+dacosta|Diana|Acosta|Rodriguez|dacosta@hotmail.com|2345|09/10/1997|F|5998765432|5998765432|DSFGDS3453|4|Glorieta 18 de Marzo|54|21|10
