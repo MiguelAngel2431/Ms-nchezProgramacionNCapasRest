@@ -1,6 +1,7 @@
 package com.digis01.MsanchezProgramacionNCapas.JPA;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -25,16 +26,17 @@ import java.util.Date;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 
+@Schema(description = "Representa un usuario en el sistema")
 @Entity
 //@NamedStoredProcedureQuery(name = "Usuarios.addUserDrections", procedureName = "UsuarioDireccionAdd", resultClasses = Usuario.class)
 @Table(name = "usuarios")
 public class Usuario {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idusuario")
     private int IdUsuario;
-
+    
     @Column(name = "nombre")
     private String Nombre;
 

@@ -1,6 +1,4 @@
-
 package com.digis01.MsanchezProgramacionNCapas.DAO;
-
 
 import com.digis01.MsanchezProgramacionNCapas.JPA.Estado;
 import com.digis01.MsanchezProgramacionNCapas.JPA.Result;
@@ -13,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class EstadoJPADAOImplementation implements IEstadoJPADAO {
-    
+
     @Autowired
     private EntityManager entityManager;
 
@@ -22,16 +20,27 @@ public class EstadoJPADAOImplementation implements IEstadoJPADAO {
         Result result = new Result();
 
         try {
-            TypedQuery<Estado> queryEstados = entityManager.createQuery("FROM Estado where Pais.IdPais = :IdPais ", Estado.class);
-            queryEstados.setParameter("IdPais", IdPais);
-            result.object = queryEstados.getResultList();
-            
-            result.correct = true;
+
+            Estado estadoJPA = entityManager.find(Estado.class, IdPais);
+
+            if (estadoJPA != null) {
+                TypedQuery<Estado> queryEstados = entityManager.createQuery("FROM Estado where Pais.IdPais = :IdPais ", Estado.class);
+                queryEstados.setParameter("IdPais", IdPais);
+                
+                result.object = queryEstados.getResultList();
+                result.correct = true;
+                result.status = 200;
+                
+            } else {
+                result.errorMessage = "Estados no encontrados, Id incorrecto";
+                result.status = 400;
+            }
 
         } catch (Exception ex) {
             result.correct = false;
             result.errorMessage = ex.getLocalizedMessage();
             result.ex = ex;
+            result.status = 500;
         }
 
         return result;

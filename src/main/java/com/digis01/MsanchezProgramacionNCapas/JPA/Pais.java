@@ -1,12 +1,14 @@
 
 package com.digis01.MsanchezProgramacionNCapas.JPA;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+@Schema(description = "Representa un pais en el sistema")
 @Entity
 public class Pais {
     

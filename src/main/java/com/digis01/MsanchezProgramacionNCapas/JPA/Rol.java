@@ -1,12 +1,14 @@
 
 package com.digis01.MsanchezProgramacionNCapas.JPA;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
+@Schema(description = "Representa un rol que desempeña el usuario en el sistema")
 @Entity
 public class Rol {
     
@@ -15,7 +17,9 @@ public class Rol {
     @Column(name = "idrol")
     private int IdRol;
     
+    
     @Column(name = "nombre")
+    @Schema(description = "Nombre del rol", example = "Administrador", required = true)
     private String Nombre;
     
     //Constructores
