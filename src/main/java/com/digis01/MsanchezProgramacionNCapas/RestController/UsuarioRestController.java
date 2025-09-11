@@ -15,8 +15,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +37,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -45,7 +53,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-@Tag(name="RestController de Usuario", description="Controlador enfocado a métodos del usuario")
+@Tag(name = "RestController de Usuario", description = "Controlador enfocado a métodos del usuario")
 @RestController
 @RequestMapping("usuarioapi")
 //@CrossOrigin(origins = "*")
@@ -80,7 +88,6 @@ public class UsuarioRestController {
         }
     }
 
-    
     //Detalles de usuario y sus direcciones;
     @Operation(summary = "Obtener un usuario y sus direcciones (detalles de usuario)", description = "Método para retornar a un usuario y sus direcciones")
     @ApiResponses(value = {
@@ -99,7 +106,6 @@ public class UsuarioRestController {
 
     }
 
-    
     //Datos del usuario;
     @Operation(summary = "Obtener a un usuario", description = "Método para retornar datos de un usuario (sin direcciones)")
     @ApiResponses(value = {
@@ -118,66 +124,65 @@ public class UsuarioRestController {
 
     }
 
-    
     //Agregar usuario
     @Operation(summary = "Agregar a un usuario", description = "Método para agregar a un usuario nuevo")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "El usuario fue agregado satisfactoriamente"),
         @ApiResponse(responseCode = "400", description = "El ID ingresado no existe o el algo en el cuerpo del JSON esta mal escrito o declarado. "
                 + "Ej. de cuerpo del Json: "
-                + "{\n" +
-                "\n" +
-                "  \"Rol\": {\n" +
-                "\n" +
-                "    \"idRol\": 3\n" +
-                "\n" +
-                "  },\n" +
-                "\n" +
-                "  \"Direcciones\": [\n" +
-                "\n" +
-                "    {\n" +
-                "      \n" +
-                "      \"Colonia\": {\n" +
-                "\n" +
-                "        \"idColonia\": 1\n" +
-                "        \n" +
-                "      },\n" +
-                "\n" +
-                "      \"numeroInterior\": \"1\",\n" +
-                "      \"numeroExterior\": \"2\",\n" +
-                "      \"calle\": \"AV GREEN LEAF\"\n" +
-                "      \n" +
-                "    }\n" +
-                "\n" +
-                "  ],\n" +
-                "\n" +
-                "  \"telefono\": \"551234\",\n" +
-                "\n" +
-                "  \"apellidoPaterno\": \"Lopez\",\n" +
-                "\n" +
-                "  \"nombre\": \"Carlos\",\n" +
-                "\n" +
-                "  \"apellidoMaterno\": \"Lopez\",\n" +
-                "\n" +
-                "  \"fechaNacimiento\": \"2025-09-09T16:08:29.814Z\",\n" +
-                "\n" +
-                "  \"email\": \"clopez@gmaail.com\",\n" +
-                "\n" +
-                "  \"userName\": \"clopez34\",\n" +
-                "\n" +
-                "  \"sexo\": \"M \",\n" +
-                "\n" +
-                "  \"celular\": \"12345\",\n" +
-                "\n" +
-                "  \"curp\": \"dfdft45\",\n" +
-                "\n" +
-                "  \"imagen\": null,\n" +
-                "\n" +
-                "  \"password\": \"123\",\n" +
-                "\n" +
-                "  \"status\": 1\n" +
-                "\n" +
-                "}"),
+                + "{\n"
+                + "\n"
+                + "  \"Rol\": {\n"
+                + "\n"
+                + "    \"idRol\": 3\n"
+                + "\n"
+                + "  },\n"
+                + "\n"
+                + "  \"Direcciones\": [\n"
+                + "\n"
+                + "    {\n"
+                + "      \n"
+                + "      \"Colonia\": {\n"
+                + "\n"
+                + "        \"idColonia\": 1\n"
+                + "        \n"
+                + "      },\n"
+                + "\n"
+                + "      \"numeroInterior\": \"1\",\n"
+                + "      \"numeroExterior\": \"2\",\n"
+                + "      \"calle\": \"AV GREEN LEAF\"\n"
+                + "      \n"
+                + "    }\n"
+                + "\n"
+                + "  ],\n"
+                + "\n"
+                + "  \"telefono\": \"551234\",\n"
+                + "\n"
+                + "  \"apellidoPaterno\": \"Lopez\",\n"
+                + "\n"
+                + "  \"nombre\": \"Carlos\",\n"
+                + "\n"
+                + "  \"apellidoMaterno\": \"Lopez\",\n"
+                + "\n"
+                + "  \"fechaNacimiento\": \"2025-09-09T16:08:29.814Z\",\n"
+                + "\n"
+                + "  \"email\": \"clopez@gmaail.com\",\n"
+                + "\n"
+                + "  \"userName\": \"clopez34\",\n"
+                + "\n"
+                + "  \"sexo\": \"M \",\n"
+                + "\n"
+                + "  \"celular\": \"12345\",\n"
+                + "\n"
+                + "  \"curp\": \"dfdft45\",\n"
+                + "\n"
+                + "  \"imagen\": null,\n"
+                + "\n"
+                + "  \"password\": \"123\",\n"
+                + "\n"
+                + "  \"status\": 1\n"
+                + "\n"
+                + "}"),
         @ApiResponse(responseCode = "500", description = "Algo salió mal al obtener al usuario")
     })
     @PostMapping()
@@ -200,33 +205,32 @@ public class UsuarioRestController {
         }
     }
 
-    
     //Editar usuario
     @Operation(summary = "Actualizar a un usuario", description = "Método para actualizar datos de un usuario")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "El usuario fue actualizado satisfactoriamente"),
         @ApiResponse(responseCode = "400", description = "El ID ingresado no existe o el algo en el cuerpo del JSON esta mal escrito o declarado. "
                 + "Ej. cuerpo del JSON: "
-                + "{\n" +
-                "    \n" +
-                "    \"Rol\": {\n" +
-                "      \"idRol\": 2\n" +
-                "    },\n" +
-                "    \"password\": \"AngPerez9\",\n" +
-                "    \"idUsuario\": 9,\n" +
-                "    \"fechaNacimiento\": \"2012-11-04T06:00:00.000+00:00\",\n" +
-                "    \"email\": \"APerez9@outlook.com\",\n" +
-                "    \"sexo\": \"F \",\n" +
-                "    \"apellidoPaterno\": \"Perez\",\n" +
-                "    \"telefono\": \"595913549\",\n" +
-                "    \"userName\": \"APerez9\",\n" +
-                "    \"nombre\": \"Angelica\",\n" +
-                "    \"apellidoMaterno\": \"Rodriguez\",\n" +
-                "    \"imagen\": null,\n" +
-                "    \"curp\": null,\n" +
-                "    \"celular\": \"55123456789\",\n" +
-                "    \"status\": 0\n" +
-                "  }\n"),
+                + "{\n"
+                + "    \n"
+                + "    \"Rol\": {\n"
+                + "      \"idRol\": 2\n"
+                + "    },\n"
+                + "    \"password\": \"AngPerez9\",\n"
+                + "    \"idUsuario\": 9,\n"
+                + "    \"fechaNacimiento\": \"2012-11-04T06:00:00.000+00:00\",\n"
+                + "    \"email\": \"APerez9@outlook.com\",\n"
+                + "    \"sexo\": \"F \",\n"
+                + "    \"apellidoPaterno\": \"Perez\",\n"
+                + "    \"telefono\": \"595913549\",\n"
+                + "    \"userName\": \"APerez9\",\n"
+                + "    \"nombre\": \"Angelica\",\n"
+                + "    \"apellidoMaterno\": \"Rodriguez\",\n"
+                + "    \"imagen\": null,\n"
+                + "    \"curp\": null,\n"
+                + "    \"celular\": \"55123456789\",\n"
+                + "    \"status\": 0\n"
+                + "  }\n"),
         @ApiResponse(responseCode = "500", description = "Algo salió mal al actualizar al usuario")
     })
     @PutMapping("/{IdUsuario}")
@@ -241,7 +245,6 @@ public class UsuarioRestController {
 
     }
 
-    
     //Eliminar usuario
     @Operation(summary = "Eliminar a un usuario", description = "Método para eliminar a un usuario")
     @ApiResponses(value = {
@@ -260,16 +263,15 @@ public class UsuarioRestController {
 
     }
 
-    
     //Baja logica
     @Operation(summary = "Proceso de baja lógica", description = "Método para actualizar el estado (activo o inactivo) de un usuario")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "El estado del usuario fue cambiado satisfactoriamente"),
         @ApiResponse(responseCode = "400", description = "El ID ingresado no existe o el algo en el cuerpo del JSON esta mal escrito o declarado (solo necesitas el campo 'status')."
                 + "Ej. cuerpo Json: "
-                + "{\n" +
-                "  \"status\": 0\n" +
-                "}"),
+                + "{\n"
+                + "  \"status\": 0\n"
+                + "}"),
         @ApiResponse(responseCode = "500", description = "Algo salió mal al actualizar el estado del usuario")
     })
     @PutMapping("/bajaLogica/{IdUsuario}")
@@ -291,16 +293,35 @@ public class UsuarioRestController {
             return ResponseEntity.status(500).body(result);
         }
     }
-    
+
+    //Mandar el archivo a validacion (si no tiene errores)
     @PostMapping("/cargamasiva")
     public ResponseEntity<Result> CargaMasiva(@RequestParam("file") MultipartFile file, Model model, HttpSession session) {
-        Result result;
-        
+
+        Result result = new Result();
+
         try {
+
             String root = System.getProperty("user.dir");
             String rutaArchivo = "/src/main/resources/archivos/";
             String fechaSubida = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSS"));
             String rutaFinal = root + rutaArchivo + fechaSubida + file.getOriginalFilename();
+
+            String hash = encriptarSHA1(rutaFinal);
+
+            // Ruta relativa a la raíz del proyecto
+            String rutaLog = "C:\\Users\\digis\\OneDrive\\Documentos\\Miguel Angel Sánchez González\\MsanchezProgramacionNCapas\\com.digis01_MsanchezProgramacionNCapasRESTT\\src\\main\\java\\com\\digis01\\MsanchezProgramacionNCapas\\RestController\\LogCargaMasiva.txt";
+
+            String linea = hash + "|" + fechaSubida;
+
+            //Enviar parametros al txt
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(rutaLog, true))) {
+                writer.write(linea);
+                writer.newLine(); // salto de línea
+                System.out.println("Línea guardada en el archivo.");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             try {
                 file.transferTo(new File(rutaFinal));
@@ -314,12 +335,14 @@ public class UsuarioRestController {
                 List<ErrorCM> errores = ValidarDatos(usuarios);
 
                 if (errores.isEmpty()) {
-                    model.addAttribute("listaErrores", errores);
-                    model.addAttribute("archivoCorrecto", true);
-                    session.setAttribute("path", rutaFinal);
+
+                    result.correct = true;
+                    result.object = rutaFinal; //Ruta
+
                 } else {
-                    model.addAttribute("listaErrores", errores);
-                    model.addAttribute("archivoCorrecto", false);
+
+                    result.correct = false;
+                    result.listaErrores = errores;
                 }
 
                 //Excel
@@ -331,14 +354,15 @@ public class UsuarioRestController {
                     model.addAttribute("listaErrores", errores);
                     model.addAttribute("archivoCorrecto", true);
                     session.setAttribute("path", rutaFinal);
+                    result.object = rutaFinal;
                 } else {
                     model.addAttribute("listaErrores", errores);
                     model.addAttribute("archivoCorrecto", false);
                 }
             }
 
-            //return "CargaMasiva";
-            
+            return ResponseEntity.status(200).body(result);
+
         } catch (Exception ex) {
             result = new Result();
             result.correct = false;
@@ -346,26 +370,45 @@ public class UsuarioRestController {
             result.ex = ex;
             return ResponseEntity.status(500).body(result);
         }
-        return null;
-        
+
+        //return "CargaMasiva";
     }
-    
-    @PostMapping("/cargamasiva/procesar")
-    public ResponseEntity CargaMasivaProcesar() {
-        Result result;
-        
+
+    //Procesar el archivo libre de errores
+    @GetMapping("/cargamasiva/procesar")
+    public ResponseEntity<Result> CargaMasivaProcesar(@RequestParam("ruta") String ruta) {
+
+        Result result = new Result();
+
         try {
-            
+
+            // Decodificamos la ruta
+            String rutaDecodificada = URLDecoder.decode(ruta, StandardCharsets.UTF_8);
+
+            List<Usuario> usuarios;
+
+            if (rutaDecodificada.toLowerCase().endsWith(".txt")) {
+                usuarios = ProcesarTXT(new File(rutaDecodificada));
+            } else {
+                usuarios = ProcesarExcel(new File(ruta));
+            }
+
+            for (Usuario usuario : usuarios) {
+                usuarioJPADAOImplementation.Add(usuario);
+            }
+
+            result.correct = true;
+            return ResponseEntity.status(200).body(result);
+
         } catch (Exception ex) {
-            result = new Result();
+
+            System.out.println(ex.getLocalizedMessage());
             result.correct = false;
-            result.errorMessage = ex.getLocalizedMessage();
-            result.ex = ex;
             return ResponseEntity.status(500).body(result);
         }
-        return null;
+
     }
-    
+
     private List<Usuario> ProcesarTXT(File file) {
         try {
 
@@ -398,7 +441,6 @@ public class UsuarioRestController {
 
                 usuario.Rol = new Rol();
                 usuario.Rol.setIdRol(campos[11] != "" ? Integer.parseInt(campos[11]) : 0);
-                
 
                 usuario.Direcciones = new ArrayList<>();
                 Direccion direccion = new Direccion();
@@ -483,7 +525,7 @@ public class UsuarioRestController {
         }
 
     }
-    
+
     //Lógica para validar datos de procesar excel / txt
     private List<ErrorCM> ValidarDatos(List<Usuario> usuarios) {
         List<ErrorCM> errores = new ArrayList<>();
@@ -525,7 +567,6 @@ public class UsuarioRestController {
 
             }
 
-            
             if (usuario.getSexo() == null || usuario.getSexo() == "") {
                 ErrorCM errorCM = new ErrorCM(linea, usuario.getSexo(), "Sexo es un campo obligatorio");
                 errores.add(errorCM);
@@ -661,4 +702,29 @@ public class UsuarioRestController {
         return errores;
     }
 
+    //Método para encriptar la ruta con sha1
+    public static String encriptarSHA1(String texto) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] mensajeDigest = md.digest(texto.getBytes());
+
+            // Convertimos los bytes a hexadecimal
+            StringBuilder sb = new StringBuilder();
+            for (byte b : mensajeDigest) {
+                sb.append(String.format("%02x", b));
+            }
+
+            return sb.toString();
+
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException("Error al encriptar con SHA-1", ex);
+        }
+    }
+
+    //Método enum
+    public enum EstadoProceso {
+        Error,
+        Procesar,
+        Procesado
+    }
 }
