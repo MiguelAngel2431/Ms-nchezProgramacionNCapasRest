@@ -1,1 +1,4 @@
-
+368aa9c3d761e8fabea1c85026798bc30997ff89|cargar.xlsx|Procesar|20250911173905|Listo para ser procesado
+368aa9c3d761e8fabea1c85026798bc30997ff89|cargar.xlsx|Procesado|20250911173905|Archivo procesado
+cb9d48e49bfd406de1a9b01a20a6a7f34e07ac7b|cargar.xlsx|Procesar|20250911173940|Listo para ser procesado
+62d9554ce70e75d85dcda4b65c467a60b7b2d941|cargar.xlsx|Procesar|20250911175008|Listo para ser procesado

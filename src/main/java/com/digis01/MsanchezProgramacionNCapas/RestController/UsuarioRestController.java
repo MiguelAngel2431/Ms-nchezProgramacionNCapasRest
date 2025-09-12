@@ -22,14 +22,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -295,6 +299,11 @@ public class UsuarioRestController {
     }
 
     //Mandar el archivo a validacion (si no tiene errores)
+    @Operation(summary = "Carga masiva (cargar archivo)", description = "Método para cargar el archivo (excel o txt) y validar si contiene errores")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "El archivo es correcto"),
+        @ApiResponse(responseCode = "500", description = "Algo salió mal al subir el archivo")
+    })
     @PostMapping("/cargamasiva")
     public ResponseEntity<Result> CargaMasiva(@RequestParam("file") MultipartFile file, Model model, HttpSession session) {
 
@@ -304,24 +313,14 @@ public class UsuarioRestController {
 
             String root = System.getProperty("user.dir");
             String rutaArchivo = "/src/main/resources/archivos/";
-            String fechaSubida = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSS"));
+            String fechaSubida = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
             String rutaFinal = root + rutaArchivo + fechaSubida + file.getOriginalFilename();
 
-            String hash = encriptarSHA1(rutaFinal);
-
-            // Ruta relativa a la raíz del proyecto
+            String nombreArchivo = file.getOriginalFilename();
             String rutaLog = "C:\\Users\\digis\\OneDrive\\Documentos\\Miguel Angel Sánchez González\\MsanchezProgramacionNCapas\\com.digis01_MsanchezProgramacionNCapasRESTT\\src\\main\\java\\com\\digis01\\MsanchezProgramacionNCapas\\RestController\\LogCargaMasiva.txt";
 
-            String linea = hash + "|" + fechaSubida;
-
-            //Enviar parametros al txt
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(rutaLog, true))) {
-                writer.write(linea);
-                writer.newLine(); // salto de línea
-                System.out.println("Línea guardada en el archivo.");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            //Encriptamos la ruta del archivo con sha1
+            String hash = encriptarSHA1(rutaFinal);
 
             try {
                 file.transferTo(new File(rutaFinal));
@@ -334,12 +333,40 @@ public class UsuarioRestController {
                 List<Usuario> usuarios = ProcesarTXT(new File(rutaFinal));
                 List<ErrorCM> errores = ValidarDatos(usuarios);
 
+                //Si la lisra de errores esta vacia...
                 if (errores.isEmpty()) {
 
-                    result.correct = true;
-                    result.object = rutaFinal; //Ruta
+                    EstadoProceso status = EstadoProceso.Procesar;
+                    String observacion = "Listo para ser procesado";
 
+                    String linea = hash + "|" + nombreArchivo + "|" + status + "|" + fechaSubida + "|" + observacion;
+
+                    //Enviar parametros al txt
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(rutaLog, true))) {
+                        writer.write(linea);
+                        writer.newLine(); // salto de línea
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    result.correct = true;
+                    result.object = hash;
+
+                    //Si la lista contiene errores...
                 } else {
+
+                    EstadoProceso status = EstadoProceso.Error;
+                    String observacion = "Archivo con errores";
+
+                    String linea = hash + "|" + nombreArchivo + "|" + status + "|" + fechaSubida + "|" + observacion;
+
+                    //Enviar parametros al txt
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(rutaLog, true))) {
+                        writer.write(linea);
+                        writer.newLine(); // salto de línea
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
                     result.correct = false;
                     result.listaErrores = errores;
@@ -351,13 +378,40 @@ public class UsuarioRestController {
                 List<ErrorCM> errores = ValidarDatos(usuarios);
 
                 if (errores.isEmpty()) {
-                    model.addAttribute("listaErrores", errores);
-                    model.addAttribute("archivoCorrecto", true);
-                    session.setAttribute("path", rutaFinal);
-                    result.object = rutaFinal;
+
+                    EstadoProceso status = EstadoProceso.Procesar;
+                    String observacion = "Listo para ser procesado";
+
+                    String linea = hash + "|" + nombreArchivo + "|" + status + "|" + fechaSubida + "|" + observacion;
+
+                    //Enviar parametros al txt
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(rutaLog, true))) {
+                        writer.write(linea);
+                        writer.newLine(); // salto de línea
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    result.correct = true;
+                    result.object = hash;
+
                 } else {
-                    model.addAttribute("listaErrores", errores);
-                    model.addAttribute("archivoCorrecto", false);
+
+                    EstadoProceso status = EstadoProceso.Error;
+                    String observacion = "Archivo con errores";
+
+                    String linea = hash + "|" + nombreArchivo + "|" + status + "|" + fechaSubida + "|" + observacion;
+
+                    //Enviar parametros al txt
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(rutaLog, true))) {
+                        writer.write(linea);
+                        writer.newLine(); // salto de línea
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    result.correct = false;
+                    result.listaErrores = errores;
                 }
             }
 
@@ -373,42 +427,183 @@ public class UsuarioRestController {
 
         //return "CargaMasiva";
     }
-
+    
     //Procesar el archivo libre de errores
-    @GetMapping("/cargamasiva/procesar")
-    public ResponseEntity<Result> CargaMasivaProcesar(@RequestParam("ruta") String ruta) {
+    @Operation(summary = "Carga masiva (insersion de datos)", description = "Método para insertar los datos del archivo en la BD, obtiendolos mediante el hash")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Datos insertados"),
+        @ApiResponse(responseCode = "500", description = "Algo salió mal al subir el archivo")
+    })
+    @GetMapping("/cargamasiva/procesar/{hash}")
+    public ResponseEntity<Result> ProcesarArchivo(@PathVariable("hash") String hash) {
 
         Result result = new Result();
 
+        String rutaLog = "C:\\Users\\digis\\OneDrive\\Documentos\\Miguel Angel Sánchez González\\MsanchezProgramacionNCapas\\com.digis01_MsanchezProgramacionNCapasRESTT\\src\\main\\java\\com\\digis01\\MsanchezProgramacionNCapas\\RestController\\LogCargaMasiva.txt";
+
         try {
+            //Leer y encontrar la linea de codigo
+            List<String> lineas = Files.readAllLines(Paths.get(rutaLog));
+            Optional<String> lineaArchivo = lineas.stream().filter(
+                    linea -> linea.startsWith(hash)).findFirst();
 
-            // Decodificamos la ruta
-            String rutaDecodificada = URLDecoder.decode(ruta, StandardCharsets.UTF_8);
+            //Si la linea existe
+            if (lineaArchivo.isPresent()) {
 
-            List<Usuario> usuarios;
+                String[] partes = lineaArchivo.get().split("\\|");
+                String nombreArchivo = partes[1];
+                String estadoArchivo = partes[2];
+                String rutaArchivo = System.getProperty("user.dir") + "/src/main/resources/archivos/" + partes[3] + partes[1];
 
-            if (rutaDecodificada.toLowerCase().endsWith(".txt")) {
-                usuarios = ProcesarTXT(new File(rutaDecodificada));
-            } else {
-                usuarios = ProcesarExcel(new File(ruta));
+                //Validar que el estado del log no venga en error
+                if (!estadoArchivo.equals("Error") && !estadoArchivo.equals("Procesar")) {
+                    result.correct = false;
+                    result.errorMessage = "El estado del archivo no es valido para procesar";
+                    return ResponseEntity.status(400).body(result);
+                }
+
+                File archivo = new File(rutaArchivo);
+
+                List<Usuario> usuarios;
+
+                if (nombreArchivo.endsWith(".txt")) {
+                    usuarios = ProcesarTXT(archivo);
+                } else {
+                    usuarios = ProcesarExcel(archivo);
+                }
+
+                //Validar que el archivo no haya sido cargado con anterioridad
+                boolean archivoYaExiste = false;
+
+                for (String linea : lineas) {
+                    String[] campos = linea.split("\\|");
+                    if (campos.length >= 3) { //Solo requiero acceder a partes 1 y 2
+                        String archivoEnLog = campos[1]; // nombreArchivo
+                        String estado = campos[2]; // estado
+                        
+                        //Si  encuentra una coincidencia
+                        if (archivoEnLog.equalsIgnoreCase(nombreArchivo)
+                                && (estado.equals("Procesado"))) {
+
+                            archivoYaExiste = true;
+                            break; // se detiene cuando encuentra la coincidencia
+
+                        }
+                    }
+                }
+
+                //Obtenemos la fecha de subida del archivo
+                String fechaSubidaStr = partes[3];
+                DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+                LocalDateTime fechaHoraSubida = LocalDateTime.parse(fechaSubidaStr, dateTimeFormatter);
+                LocalDateTime fechaHoraAhora = LocalDateTime.now();
+
+                //Calculamos la direfencia de tiempo
+                Duration diferencia = Duration.between(fechaHoraSubida, fechaHoraAhora);
+
+                //Validamos que el tiempo no haya exedido dos minutos
+                if (estadoArchivo.equals("Procesar") && diferencia.toMinutes() >= 2) {
+
+                    EstadoProceso status = EstadoProceso.Error;
+                    String observacion = "Tiempo expirado para procesamiento";
+
+                    String lineaNueva = hash + "|" + nombreArchivo + "|" + status + "|" + partes[3] + "|" + observacion;
+
+                    //Remplaza la linea del log
+                    List<String> nuevasLineas = new ArrayList<>();
+
+                    for (String linea : lineas) {
+                        if (linea.startsWith(hash)) {
+                            nuevasLineas.add(lineaNueva);
+                        } else {
+                            nuevasLineas.add(linea);
+                        }
+                    }
+
+                    //Sobreescribimos el archivo Log
+                    Files.write(Paths.get(rutaLog), nuevasLineas);
+
+                } else {
+
+                    //Validamos si el archivo ya existe
+                    if (archivoYaExiste) {
+                        result.correct = false;
+                        result.errorMessage = "Este archivo ya fue cargado anteriormente y no puede duplicarse.";
+                        return ResponseEntity.status(HttpStatus.CONFLICT).body(result);
+                    }
+
+                    //Acutalzar el log
+                    EstadoProceso status = EstadoProceso.Procesado;
+                    String observacion = "Archivo procesado";
+
+                    String lineaNueva = hash + "|" + nombreArchivo + "|" + status + "|" + partes[3] + "|" + observacion;
+
+                    //Enviar parametros al txt
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(rutaLog, true))) {
+                        writer.write(lineaNueva);
+                        writer.newLine(); // salto de línea
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    //Hacer insersion a la BD
+                    for (Usuario usuario : usuarios) {
+                        usuarioJPADAOImplementation.Add(usuario);
+                    }
+
+                    result.correct = true;
+                    result.object = rutaArchivo;
+
+                }
+
             }
 
-            for (Usuario usuario : usuarios) {
-                usuarioJPADAOImplementation.Add(usuario);
-            }
-
-            result.correct = true;
             return ResponseEntity.status(200).body(result);
 
         } catch (Exception ex) {
-
-            System.out.println(ex.getLocalizedMessage());
             result.correct = false;
+            result.errorMessage = ex.getMessage();
+            result.ex = ex;
             return ResponseEntity.status(500).body(result);
         }
-
     }
 
+//    //Procesar el archivo libre de errores
+//    @GetMapping("/cargamasiva/procesar")
+//    public ResponseEntity<Result> CargaMasivaProcesar(@RequestParam("ruta") String ruta) {
+//
+//        Result result = new Result();
+//
+//        try {
+//
+//            // Decodificamos la ruta
+//            String rutaDecodificada = URLDecoder.decode(ruta, StandardCharsets.UTF_8);
+//
+//            List<Usuario> usuarios;
+//
+//            if (rutaDecodificada.toLowerCase().endsWith(".txt")) {
+//                usuarios = ProcesarTXT(new File(rutaDecodificada));
+//            } else {
+//                usuarios = ProcesarExcel(new File(ruta));
+//            }
+//
+//            for (Usuario usuario : usuarios) {
+//                usuarioJPADAOImplementation.Add(usuario);
+//            }
+//
+//            result.correct = true;
+//            return ResponseEntity.status(200).body(result);
+//
+//        } catch (Exception ex) {
+//
+//            System.out.println(ex.getLocalizedMessage());
+//            result.correct = false;
+//            return ResponseEntity.status(500).body(result);
+//        }
+//
+//    }
+    //Metodo para validar si el TXT contiene errores (YA FUNCIONA, YA NO LE MUEVAS)
     private List<Usuario> ProcesarTXT(File file) {
         try {
 
@@ -465,6 +660,7 @@ public class UsuarioRestController {
         }
     }
 
+    //Metodo para validar si el EXCEL contiene errores (YA FUNCIONA, YA NO LE MUEVAS)
     private List<Usuario> ProcesarExcel(File file) {
         List<Usuario> usuarios = new ArrayList<>();
 
