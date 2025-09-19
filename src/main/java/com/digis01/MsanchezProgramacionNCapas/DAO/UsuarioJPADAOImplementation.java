@@ -10,6 +10,8 @@ import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -30,6 +32,42 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPADAO {
             result.object = queryUsuario.getResultList();
 
             result.correct = true;
+
+        } catch (Exception ex) {
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+        }
+
+        return result;
+    }
+    
+    //Busqueda abierta
+    @Override
+    public Result GetAll(Usuario usuario) {
+
+        Result result = new Result();
+
+        try {
+            TypedQuery<Usuario> queryUsuario = entityManager.createQuery("FROM Usuario", Usuario.class);
+            List<Usuario> usuarios = queryUsuario.getResultList();
+            
+            Stream<Usuario> stream = usuarios.stream();
+            
+            if (usuario.getNombre() != null && !usuario.getNombre().isBlank()) {
+                stream = stream.filter(user -> user.getNombre() != null &&
+                        user.getNombre().toLowerCase().contains(usuario.getNombre().toLowerCase()));
+            }
+            
+            List<Usuario> filtrados = stream.collect(Collectors.toList());
+            
+            result.object = filtrados;
+            result.correct = true;
+
+
+            //result.object = queryUsuario.getResultList();
+
+            //result.correct = true;
 
         } catch (Exception ex) {
             result.correct = false;

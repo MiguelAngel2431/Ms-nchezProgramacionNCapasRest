@@ -12,7 +12,7 @@ import com.digis01.MsanchezProgramacionNCapas.JPA.Result;
  */
 public interface IUsuarioJPADAO {
     Result GetAll();
-    //Result GetAll(com.digis01.MsanchezProgramacionNCapas.JPA.Usuario usuario);
+    Result GetAll(com.digis01.MsanchezProgramacionNCapas.JPA.Usuario usuario);
     Result GetById(int idUsuario);
     Result GetDetail(int IdUsuario);
     Result Add(com.digis01.MsanchezProgramacionNCapas.JPA.Usuario usuario);

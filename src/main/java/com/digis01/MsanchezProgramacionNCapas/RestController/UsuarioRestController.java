@@ -429,13 +429,13 @@ public class UsuarioRestController {
     }
     
     //Procesar el archivo libre de errores
-    @Operation(summary = "Carga masiva (insersion de datos)", description = "Método para insertar los datos del archivo en la BD, obtiendolos mediante el hash")
+    @Operation(summary = "Carga masiva (insersión de datos)", description = "Método para insertar los datos del archivo en la BD, obtiendolos mediante el hash")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Datos insertados"),
         @ApiResponse(responseCode = "500", description = "Algo salió mal al subir el archivo")
     })
     @GetMapping("/cargamasiva/procesar/{hash}")
-    public ResponseEntity<Result> ProcesarArchivo(@PathVariable("hash") String hash) {
+    public ResponseEntity<Result> ProcesarArchivo(@Parameter(description = "Hash (cadena encriptada)", required = true) @PathVariable("hash") String hash) {
 
         Result result = new Result();
 
