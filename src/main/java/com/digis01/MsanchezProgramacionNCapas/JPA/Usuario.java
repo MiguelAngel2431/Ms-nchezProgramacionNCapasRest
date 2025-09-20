@@ -31,12 +31,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 //@NamedStoredProcedureQuery(name = "Usuarios.addUserDrections", procedureName = "UsuarioDireccionAdd", resultClasses = Usuario.class)
 @Table(name = "usuarios")
 public class Usuario {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idusuario")
     private int IdUsuario;
-    
+
     @Column(name = "nombre")
     private String Nombre;
 
@@ -71,20 +71,18 @@ public class Usuario {
 
     @Column(name = "curp")
     private String Curp;
-    
+
     @Column(name = "status")
     private int Status;
 
     /*@Column(name = "idrol")
     public int IdRol;*/
-    
     @ManyToOne
     @JoinColumn(name = "idrol", nullable = true)
     public Rol Rol; //Propiedad de navegacion (no ocupa setter ni getter, porque es public)
 
     /*@OneToMany
     @JoinColumn (name = "iddireccion")*/
-    
     @OneToMany(mappedBy = "Usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     public List<Direccion> Direcciones = new ArrayList<>();
 
@@ -115,8 +113,8 @@ public class Usuario {
 
         this.Rol = new Rol();
         this.Rol.setIdRol(usuarioML.Rol.getIdRol());
-        
-        if (usuarioML.Direcciones.get(0).getIdDireccion() == -1) { 
+
+        if (usuarioML.Direcciones.get(0).getIdDireccion() == -1) {
             usuarioML.Direcciones = null;
         } else {
 
@@ -281,7 +279,7 @@ public class Usuario {
     public String getImagen() {
         return this.Imagen;
     }
-    
+
     //Getter y setter de status
     public int getStatus() {
         return Status;
@@ -290,6 +288,6 @@ public class Usuario {
     public void setStatus(int Status) {
         this.Status = Status;
     }
-    
 
+    
 }

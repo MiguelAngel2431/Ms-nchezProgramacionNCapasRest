@@ -73,13 +73,30 @@ public class UsuarioRestController {
         @ApiResponse(responseCode = "500", description = "Algo salió mal al obtener a los usuarios")
     })
     @GetMapping()
-    public ResponseEntity GetAll() {
+    public ResponseEntity GetAll(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String apellidoPaterno,
+            @RequestParam(required = false) String apellidoMaterno,
+            @RequestParam(required = false) Integer idRol) {
 
         Result result;
+        Usuario usuario = new Usuario();
+        
+        usuario.setNombre(nombre);
+        usuario.setApellidoPaterno(apellidoPaterno);
+        usuario.setApellidoMaterno(apellidoMaterno);
+        
+        usuario.Rol = new Rol();
+
+        if (idRol != null) {
+            usuario.Rol = new Rol();
+            usuario.Rol.setIdRol(idRol);
+            
+        }
 
         try {
 
-            result = usuarioJPADAOImplementation.GetAll();
+            result = usuarioJPADAOImplementation.GetAll(usuario);
             result.correct = true;
             return ResponseEntity.status(200).body(result);
 
@@ -427,7 +444,7 @@ public class UsuarioRestController {
 
         //return "CargaMasiva";
     }
-    
+
     //Procesar el archivo libre de errores
     @Operation(summary = "Carga masiva (insersión de datos)", description = "Método para insertar los datos del archivo en la BD, obtiendolos mediante el hash")
     @ApiResponses(value = {
@@ -480,7 +497,7 @@ public class UsuarioRestController {
                     if (campos.length >= 3) { //Solo requiero acceder a partes 1 y 2
                         String archivoEnLog = campos[1]; // nombreArchivo
                         String estado = campos[2]; // estado
-                        
+
                         //Si  encuentra una coincidencia
                         if (archivoEnLog.equalsIgnoreCase(nombreArchivo)
                                 && (estado.equals("Procesado"))) {

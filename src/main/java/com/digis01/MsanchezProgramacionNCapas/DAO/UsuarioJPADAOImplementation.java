@@ -41,7 +41,7 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPADAO {
 
         return result;
     }
-    
+
     //Busqueda abierta
     @Override
     public Result GetAll(Usuario usuario) {
@@ -51,24 +51,36 @@ public class UsuarioJPADAOImplementation implements IUsuarioJPADAO {
         try {
             TypedQuery<Usuario> queryUsuario = entityManager.createQuery("FROM Usuario", Usuario.class);
             List<Usuario> usuarios = queryUsuario.getResultList();
-            
+
             Stream<Usuario> stream = usuarios.stream();
-            
+
             if (usuario.getNombre() != null && !usuario.getNombre().isBlank()) {
-                stream = stream.filter(user -> user.getNombre() != null &&
-                        user.getNombre().toLowerCase().contains(usuario.getNombre().toLowerCase()));
+                stream = stream.filter(user -> user.getNombre() != null
+                        && user.getNombre().toLowerCase().contains(usuario.getNombre().toLowerCase()));
             }
-            
+
+            if (usuario.getApellidoPaterno() != null && !usuario.getApellidoPaterno().isBlank()) {
+                stream = stream.filter(u -> u.getApellidoPaterno() != null
+                        && u.getApellidoPaterno().toLowerCase().contains(usuario.getApellidoPaterno().toLowerCase()));
+            }
+
+            if (usuario.getApellidoMaterno() != null && !usuario.getApellidoMaterno().isBlank()) {
+                stream = stream.filter(u -> u.getApellidoMaterno() != null
+                        && u.getApellidoMaterno().toLowerCase().contains(usuario.getApellidoMaterno().toLowerCase()));
+            }
+
+//            if (usuario.getIdRol() != null && usuario.getIdRol() != 0) {
+//                stream = stream.filter(u -> u.getIdRol() != null
+//                        && u.getIdRol().equals(usuario.getIdRol()));
+//            }
+
             List<Usuario> filtrados = stream.collect(Collectors.toList());
-            
+
             result.object = filtrados;
             result.correct = true;
 
-
             //result.object = queryUsuario.getResultList();
-
             //result.correct = true;
-
         } catch (Exception ex) {
             result.correct = false;
             result.errorMessage = ex.getLocalizedMessage();
