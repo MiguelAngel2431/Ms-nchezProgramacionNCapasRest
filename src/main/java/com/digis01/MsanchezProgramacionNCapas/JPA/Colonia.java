@@ -28,7 +28,7 @@ public class Colonia {
     
     @ManyToOne
     @JoinColumn(name = "idmunicipio")
-    public Municipio Municipio;
+    public Municipio municipio;
     
     //public Municipio Municipio; //Propiedad de navegacion (no ocupa setter ni getter, porque es public)
     
@@ -40,8 +40,8 @@ public class Colonia {
         this.Nombre = coloniaML.getNombre();
         this.CodigoPostal = coloniaML.getCodigoPostal();
         
-        this.Municipio = new Municipio();
-        this.Municipio.setIdMunicipio(coloniaML.Municipio.getIdMunicipio());
+        this.municipio = new Municipio();
+        this.municipio.setIdMunicipio(coloniaML.municipio.getIdMunicipio());
     }
     
     /*public Colonia (int idColonia, String nombre, String codigoPostal) {
@@ -77,4 +77,14 @@ public class Colonia {
     public String getCodigoPostal() {
         return this.CodigoPostal;
     }
+
+    public Municipio getMunicipio() {
+        return municipio;
+    }
+
+    public void setMunicipio(Municipio municipio) {
+        this.municipio = municipio;
+    }
+    
+    
 }

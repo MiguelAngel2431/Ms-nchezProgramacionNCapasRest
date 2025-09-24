@@ -62,12 +62,11 @@ public class DireccionRestController {
                 "    \"Direcciones\": [\n" +
                 "      {\n" +
                 "        \"Colonia\": {\n" +
-                "          \"idColonia\": 19,\n" +
+                "          \"idColonia\": 19\n" +
                 "        },\n" +
                 "        \"numeroExterior\": \"144\",\n" +
                 "        \"calle\": \"AV nava\",\n" +
-                "        \"numeroInterior\": \"133\",\n" +
-                "        \"idDireccion\": 210\n" +
+                "        \"numeroInterior\": \"133\"\n" +
                 "      }\n" +
                 "    ],\n" +
                 "\n" +

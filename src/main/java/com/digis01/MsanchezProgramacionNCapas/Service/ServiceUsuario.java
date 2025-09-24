@@ -6,10 +6,12 @@ import com.digis01.MsanchezProgramacionNCapas.JPA.Direccion;
 import com.digis01.MsanchezProgramacionNCapas.JPA.Result;
 import com.digis01.MsanchezProgramacionNCapas.JPA.Rol;
 import com.digis01.MsanchezProgramacionNCapas.JPA.Usuario;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,16 +28,53 @@ public class ServiceUsuario {
     private IRepositoryUsuario iRepositoryUsuario;
 
     @Autowired
+    private EntityManager entityManager;
+
+    @Autowired
     private IRepositoryDireccion iRespositoryDireccion;
 
-    public Result GetAllRespository() {
+    //Obtener todos los usuarios
+//    public Result GetAllRespository() {
+//
+//        Result result = new Result();
+//
+//        try {
+//
+//            //Optional<Usuario> usuarioRepository = iRepositoryUsuario.findAll();
+//            result.object = iRepositoryUsuario.findAll();
+//            result.correct = true;
+//
+//        } catch (Exception ex) {
+//            result = new Result();
+//            result.correct = false;
+//            result.errorMessage = ex.getLocalizedMessage();
+//            result.ex = ex;
+//
+//        }
+//
+//        return result;
+//    }
+    public Result GetAllRespository(Usuario filtro) {
 
         Result result = new Result();
 
         try {
 
-            //Optional<Usuario> usuarioRepository = iRepositoryUsuario.findAll();
-            result.object = iRepositoryUsuario.findAll();
+            // Obtener todos los usuarios sin filtro
+            List<Usuario> usuarios = iRepositoryUsuario.findAll();
+
+            // Filtrar con Streams según campos no nulos/no vacíos
+            List<Usuario> usuariosFiltrados = usuarios.stream()
+                    .filter(u -> filtro.getNombre() == null || filtro.getNombre().isEmpty()
+                        || u.getNombre().toLowerCase().contains(filtro.getNombre().toLowerCase()))
+                    .filter(u -> filtro.getApellidoPaterno() == null || filtro.getApellidoPaterno().isEmpty()
+                        || u.getApellidoPaterno().toLowerCase().contains(filtro.getApellidoPaterno().toLowerCase()))
+                    .filter(u -> filtro.getApellidoMaterno() == null || filtro.getApellidoMaterno().isEmpty()
+                        || u.getApellidoMaterno().toLowerCase().contains(filtro.getApellidoMaterno().toLowerCase()))
+                    
+                    .collect(Collectors.toList());
+
+            result.object = usuariosFiltrados;
             result.correct = true;
 
         } catch (Exception ex) {
@@ -110,6 +149,7 @@ public class ServiceUsuario {
         Result result = new Result();
 
         try {
+            usuario.setStatus(1);
             usuario.Direcciones.get(0).Usuario = usuario;
             Usuario savedUser = iRepositoryUsuario.save(usuario);
 
@@ -191,6 +231,36 @@ public class ServiceUsuario {
             result.errorMessage = ex.getLocalizedMessage();
             result.ex = ex;
 
+        }
+
+        return result;
+    }
+
+    //Baja lógica
+    @Transactional
+    public Result BajaLogica(int IdUsuario) {
+
+        Result result = new Result();
+
+        try {
+
+            Optional<Usuario> usuarioFind = iRepositoryUsuario.findById(IdUsuario);
+
+            if (usuarioFind.isPresent()) {
+
+                Usuario usuarioJPA = entityManager.find(Usuario.class, IdUsuario);
+                //usuarioJPA.setStatus(usuarioJPA.getStatus() == 1 ? usuarioJPA.setStatus(0) : usuarioJPA.setStatus(1));
+
+                usuarioJPA.setStatus(usuarioJPA.getStatus() == 1 ? 0 : 1);
+
+                entityManager.merge(usuarioJPA);
+            }
+
+        } catch (Exception ex) {
+            result = new Result();
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
         }
 
         return result;

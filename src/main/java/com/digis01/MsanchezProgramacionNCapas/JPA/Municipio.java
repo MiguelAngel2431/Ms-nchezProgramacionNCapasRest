@@ -28,7 +28,7 @@ public class Municipio {
     
     @ManyToOne
     @JoinColumn(name = "idestado")
-    public Estado Estado;
+    public Estado estado;
 
     
     //Constructores
@@ -38,8 +38,8 @@ public class Municipio {
         this.IdMunicipio = municipioML.getIdMunicipio();
         this.Nombre = municipioML.getNombre();
         
-        this.Estado = new Estado();
-        this.Estado.setIdEstado(municipioML.Estado.getIdEstado());
+        this.estado = new Estado();
+        this.estado.setIdEstado(municipioML.estado.getIdEstado());
     }
     
     /*public Municipio(int idMunicipio, String nombre) {
@@ -65,5 +65,14 @@ public class Municipio {
     public String getNombre() {
         return this.Nombre;
     }
+
+    public Estado getEstado() {
+        return estado;
+    }
+
+    public void setEstado(Estado estado) {
+        this.estado = estado;
+    }
+    
     
 }

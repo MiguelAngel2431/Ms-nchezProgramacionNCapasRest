@@ -1,5 +1,6 @@
 package com.digis01.MsanchezProgramacionNCapas.Service;
 
+import com.digis01.MsanchezProgramacionNCapas.DAO.IDireccionJPADAO;
 import com.digis01.MsanchezProgramacionNCapas.DAO.IRepositoryDireccion;
 import com.digis01.MsanchezProgramacionNCapas.DAO.IRepositoryUsuario;
 import com.digis01.MsanchezProgramacionNCapas.JPA.Colonia;
@@ -22,6 +23,8 @@ public class ServiceDireccion {
     private IRepositoryDireccion iRepositoryDireccion;
     @Autowired
     private IRepositoryUsuario iRepositoryUsuario;
+    
+
 
     //Obtener una direccion
     public Result GetById(int IdDireccion) {
@@ -49,7 +52,7 @@ public class ServiceDireccion {
 
     }
 
-    //Agregar a un usuario
+    //Agregar a una direccion
     public Result Add(@RequestBody Usuario usuario) {
 
         Result result = new Result();
@@ -87,7 +90,7 @@ public class ServiceDireccion {
         return result;
     }
     
-    //Actualizar a un usuario
+    //Actualizar una direccion
     public Result Update(@RequestBody Usuario usuario) {
 
         Result result = new Result();
@@ -100,19 +103,19 @@ public class ServiceDireccion {
 
             if (direccionFind.isPresent()) {
                 
-                Direccion direccion = new Direccion();
+//                Direccion direccion = new Direccion();
                 
-                direccion.setCalle(usuario.Direcciones.get(0).getCalle());
-                direccion.setNumeroInterior(usuario.Direcciones.get(0).getNumeroInterior());
-                direccion.setNumeroExterior(usuario.Direcciones.get(0).getNumeroExterior());
+                dir.setCalle(usuario.Direcciones.get(0).getCalle());
+                dir.setNumeroInterior(usuario.Direcciones.get(0).getNumeroInterior());
+                dir.setNumeroExterior(usuario.Direcciones.get(0).getNumeroExterior());
                 
-                direccion.Colonia = new Colonia();
-                direccion.Colonia.setIdColonia(usuario.Direcciones.get(0).Colonia.getIdColonia());
+                dir.Colonia = new Colonia();
+                dir.Colonia.setIdColonia(usuario.Direcciones.get(0).Colonia.getIdColonia());
                 
-                direccion.Usuario = new Usuario();
-                direccion.Usuario.setIdUsuario(usuario.getIdUsuario());
+                dir.Usuario = new Usuario();
+                dir.Usuario.setIdUsuario(usuario.getIdUsuario());
                 
-                Direccion savedDirection = iRepositoryDireccion.save(direccion);
+                Direccion savedDirection = iRepositoryDireccion.save(dir);
 
                 result.object = savedDirection;
                 result.correct = true;
@@ -129,5 +132,29 @@ public class ServiceDireccion {
 
         return result;
 
+    }
+    
+    //Eliminar a una direccion
+    public Result Delete(int IdDireccion) {
+        Result result = new Result();
+
+        try {
+            
+            Optional<Direccion> direccionFind = iRepositoryDireccion.findById(IdDireccion);
+
+            if (direccionFind.isPresent()) {
+                iRepositoryDireccion.deleteById(IdDireccion);
+                result.correct = true;
+            }
+
+        } catch (Exception ex) {
+            result = new Result();
+            result.correct = false;
+            result.errorMessage = ex.getLocalizedMessage();
+            result.ex = ex;
+
+        }
+
+        return result;
     }
 }

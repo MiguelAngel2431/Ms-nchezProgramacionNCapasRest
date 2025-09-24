@@ -51,9 +51,9 @@ public class DemoRestController {
                 usuario.Direcciones.get(0).getNumeroInterior() + " " +
                 usuario.Direcciones.get(0).getNumeroExterior() +
                 ", colonia " + usuario.Direcciones.get(0).Colonia.getNombre() + ", " +
-                usuario.Direcciones.get(0).Colonia.Municipio.getNombre() + ", " +
-                usuario.Direcciones.get(0).Colonia.Municipio.Estado.getNombre() + ", " +
-                usuario.Direcciones.get(0).Colonia.Municipio.Estado.Pais.getNombre();
+                usuario.Direcciones.get(0).Colonia.municipio.getNombre() + ", " +
+                usuario.Direcciones.get(0).Colonia.municipio.estado.getNombre() + ", " +
+                usuario.Direcciones.get(0).Colonia.municipio.estado.pais.getNombre();
                           
     }
     

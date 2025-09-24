@@ -26,7 +26,7 @@ public class Estado {
     //public Pais Pais; //Propiedad de navegacion (no ocupa setter ni getter, porque es public)
     @ManyToOne
     @JoinColumn(name = "idpais")
-    public Pais Pais;
+    public Pais pais;
     
     //Constructores
     public Estado() {}
@@ -35,8 +35,8 @@ public class Estado {
         this.IdEstado = estadoML.getIdEstado();
         this.Nombre = estadoML.getNombre();
         
-        this.Pais = new Pais();
-        this.Pais.setIdPais(estadoML.Pais.getIdPais());
+        this.pais = new Pais();
+        this.pais.setIdPais(estadoML.pais.getIdPais());
         
     }
     
@@ -63,5 +63,15 @@ public class Estado {
     public String getNombre() {
         return this.Nombre;
     }
+
+    public Pais getPais() {
+        return pais;
+    }
+
+    public void setPais(Pais pais) {
+        this.pais = pais;
+    }
+    
+    
     
 }
